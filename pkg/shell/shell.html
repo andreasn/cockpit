@@ -2678,7 +2678,7 @@
         </div>
       </div>
     </div>
-
+<!--
     <div class="modal" id="network-vlan-settings-dialog"
          tabindex="-1" role="dialog"
          data-backdrop="static">
@@ -2699,6 +2699,50 @@
             </button>
             <button class="btn btn-primary" translatable="yes" id="network-vlan-settings-apply">
               Apply
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+-->
+
+
+    <div class="modal" id="network-vlan-settings-dialog"
+         tabindex="-1" role="dialog"
+         data-backdrop="static">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Set up Server Role</h4>
+          </div>
+          <div class="modal-body">
+            <table class="cockpit-form-table">
+              <tr>
+                <td>Domain name</td>
+                <td>
+                  <input class="form-control" id="a">
+                </td>
+              </tr>
+              <tr>
+                <td>Set Administrator Password</td>
+                <td>
+                  <input class="form-control" type="password" id="b">
+                </td>
+              </tr>
+              <tr>
+                <td>Repeat Administrator Password</td>
+                <td class="check-passwords has-error">
+                  <input class="form-control" type="password" id="c">
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-default" translatable="yes" id="network-vlan-settings-cancel">
+              Cancel
+            </button>
+            <button class="btn btn-primary" translatable="yes" id="network-vlan-settings-apply">
+              Next
             </button>
           </div>
         </div>
