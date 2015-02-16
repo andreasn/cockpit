@@ -220,6 +220,8 @@ PageDashboard.prototype = {
     setup: function() {
         var self = this;
 
+        var plot_min_x_range = 5*60;
+
         var current_monitor = 0;
         var plot_x_range = 5*60;
         var plot_x_stop;
@@ -261,6 +263,10 @@ PageDashboard.prototype = {
             scroll_plot_right();
         });
 
+        $('#dashboard-zoom-out').click(function () {
+            zoom_plot_out();
+        });
+
         function update_scroll_buttons() {
             $('#dashboard-scroll-right').attr('disabled', plot_x_stop === undefined);
         }
@@ -287,10 +293,36 @@ PageDashboard.prototype = {
             var step = plot_x_range / 10;
             if (plot_x_stop !== undefined) {
                 plot_x_stop += step;
-                if (plot_x_stop >= (new Date()).getTime() / 1000 - 10)
-                    plot_x_stop = undefined;
                 plot_reset_soft();
             }
+            update_scroll_buttons();
+        }
+
+        function zoom_plot_start() {
+            if (plot_x_stop === undefined) {
+                self.plots.forEach(function (p) {
+                    p.stop_walking();
+                });
+                plot_x_stop = (new Date()).getTime() / 1000;
+                update_scroll_buttons();
+            }
+        }
+
+        function zoom_plot_in(x_range, x_stop) {
+            $('#dashboard-range-buttons button').removeClass("active");
+            plot_x_range = x_range;
+            plot_x_stop = x_stop;
+            plot_reset_soft();
+            update_scroll_buttons();
+        }
+
+        function zoom_plot_out(x_range, x_stop) {
+            var factor = 2.0;
+            $('#dashboard-range-buttons button').removeClass("active");
+            if (plot_x_stop !== undefined)
+                plot_x_stop += (factor/4)*plot_x_range;
+            plot_x_range *= factor;
+            plot_reset_soft();
             update_scroll_buttons();
         }
 
@@ -485,9 +517,16 @@ PageDashboard.prototype = {
                 self.plots.push(plot);
 
                 $(plot).on("changed", function() {
-                    if (plot.archives)
+                    if (plot.archives && !options.selection) {
                         $("#dashboard-toolbar").show();
+                        options.selection = { mode: "x" };
+                        plot.set_options(options);
+                        plot.refresh();
+                    }
                 });
+
+                $(plot).on("zoomstart", function (event) { zoom_plot_start(); });
+                $(plot).on("zoom", function (event, x_range, x_stop) { zoom_plot_in(x_range, x_stop); });
             });
 
             series = {};
@@ -495,6 +534,13 @@ PageDashboard.prototype = {
         }
 
         function plot_reset_soft() {
+            if (plot_x_range < plot_min_x_range) {
+                plot_x_stop += (plot_min_x_range - plot_x_range)/2;
+                plot_x_range = plot_min_x_range;
+            }
+            if (plot_x_stop >= (new Date()).getTime() / 1000 - 10)
+                plot_x_stop = undefined;
+
             self.plots.forEach(function (p) {
                 p.stop_walking();
                 p.reset(plot_x_range, plot_x_stop);

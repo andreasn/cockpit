@@ -158,6 +158,13 @@ shell.plot = function plot(element, x_range_seconds, x_stop_seconds) {
     }
 
     function start_walking() {
+        /* Don't overflow 32 signed bits with the interval.  This
+         * means that plots that would make about one step every month
+         * don't walk at all, but I guess that is ok.
+         */
+        if (interval > 2000000000)
+            return;
+
         if (!walk_timer)
             walk_timer = window.setInterval(function () {
                 now += interval;
@@ -174,6 +181,9 @@ shell.plot = function plot(element, x_range_seconds, x_stop_seconds) {
     }
 
     function reset(x_range_seconds, x_stop_seconds) {
+        if (flot)
+            flot.clearSelection(true);
+
         now = (new Date()).getTime();
 
         if (x_stop_seconds !== undefined)
@@ -537,8 +547,20 @@ shell.plot = function plot(element, x_range_seconds, x_stop_seconds) {
         hover(null);
     }
 
+    function selecting(event, ranges) {
+        if (ranges)
+            $(result).triggerHandler("zoomstart", [ ]);
+    }
+
+    function selected(event, ranges) {
+        flot.clearSelection(true);
+        $(result).triggerHandler("zoom", [ (ranges.xaxis.to - ranges.xaxis.from) / 1000, ranges.xaxis.to / 1000]);
+    }
+
     $(element).on("plothover", hover_on);
     $(element).on("mouseleave", hover_off);
+    $(element).on("plotselecting", selecting);
+    $(element).on("plotselected", selected);
 
     reset(x_range_seconds, x_stop_seconds);
 
