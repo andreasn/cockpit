@@ -206,22 +206,46 @@
           </table>
         </div>
         <div id="server-graph-columns" class="col-md-8 col-lg-9">
-          <div id="server-graph-column-1" class="col-md-12 col-lg-6">
-            <div style="color:black">CPU<span style="float:right" id="server_cpu_text"></span></div>
-            <div style="height:120px" id="server_cpu_graph" class="server-graph" onclick="cockpit.location.go('cpu_status');"></div>
-            <br/>
-            <div style="color:black">Memory<span style="float:right" id="server_memory_text"></span></div>
-            <div style="height:120px" id="server_memory_graph" class="server-graph" onclick="cockpit.location.go('memory_status');"></div>
-            <br/>
+          <div class="btn-toolbar" id="server-graph-toolbar" hidden>
+            <div class="btn-group" id="server-range-buttons">
+              <button class="btn btn-default" data-seconds="604800">1 week</button>
+              <button class="btn btn-default" data-seconds="86400">1 day</button>
+              <button class="btn btn-default" data-seconds="21600">6 hours</button>
+              <button class="btn btn-default" data-seconds="3600">1 hour</button>
+              <button class="btn btn-default" data-seconds="300">5 minutes</button>
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-default fa fa-minus-square-o" id="server-zoom-out"></button>
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-default fa fa-angle-left" id="server-scroll-left"></button>
+              <button class="btn btn-default fa fa-angle-right" id="server-scroll-right"></button>
+            </div>
           </div>
-          <div id="server-graph-column-2" class="col-md-12 col-lg-6">
-            <div style="color:black">Disk I/O<span style="float:right" id="server_disk_io_text"></span></div>
-            <div style="height:120px" id="server_disk_io_graph" class="server-graph" onclick="cockpit.location.go('storage');"></div>
-            <br/>
-            <div style="color:black">Network Traffic<span style="float:right" id="server_network_traffic_text"></span></div>
-            <div style="height:120px" id="server_network_traffic_graph" class="server-graph" onclick="cockpit.location.go('networking');"></div>
-            <br/>
+          <br/>
+          <div style="color:black">
+            <a onclick="cockpit.location.go('cpu_status');">CPU</a>
+            <span style="float:right" id="server_cpu_text"></span>
           </div>
+          <div style="height:120px" id="server_cpu_graph" class="server-graph"></div>
+          <br/>
+          <div style="color:black">
+            <a onclick="cockpit.location.go('memory_status');">Memory</a>
+            <span style="float:right" id="server_memory_text"></span>
+          </div>
+          <div style="height:120px" id="server_memory_graph" class="server-graph"></div>
+          <br/>
+          <div style="color:black">
+            <a onclick="cockpit.location.go('networking');">Network Traffic</a>
+            <span style="float:right" id="server_network_traffic_text"></span>
+          </div>
+          <div style="height:120px" id="server_network_traffic_graph" class="server-graph"></div>
+          <br/>
+          <div style="color:black">
+            <a onclick="cockpit.location.go('storage');">Disk I/O</a>
+            <span style="float:right" id="server_disk_io_text"></span>
+          </div>
+          <div style="height:120px" id="server_disk_io_graph" class="server-graph"></div>
         </div>
       </div>
 

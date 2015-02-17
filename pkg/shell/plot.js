@@ -204,6 +204,11 @@ shell.plot = function plot(element, x_range_seconds, x_stop_seconds) {
         options = { };
         data = [ ];
         flot = null;
+
+        $(element).off("plothover", hover_on);
+        $(element).off("mouseleave", hover_off);
+        $(element).off("plotselecting", selecting);
+        $(element).off("plotselected", selected);
         $(element).empty();
     }
 

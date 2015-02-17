@@ -46,6 +46,75 @@ function update_realm_privileged() {
 $(shell.default_permission).on("changed", update_realm_privileged);
 $(shell.default_permission).on("changed", update_hostname_privileged);
 
+var common_plot_options = {
+    colors: [ "#0099d3" ],
+    legend: { show: false },
+    series: { shadowSize: 0,
+              lines: { lineWidth: 0.0,
+                       fill: 1.0
+                     }
+            },
+    xaxis: { tickColor: "#d1d1d1", mode: "time", tickFormatter: shell.format_date_tick, minTickSize: [ 1, 'minute' ] },
+    // The point radius influences
+    // the margin around the grid
+    // even if no points are plotted.
+    // We don't want any margin, so
+    // we set the radius to zero.
+    points: { radius: 0 },
+    grid: { borderWidth: 1,
+            aboveData: true,
+            color: "black",
+            borderColor: $.color.parse("black").scale('a', 0.22).toString()
+          }
+};
+
+var resource_monitors = [
+    { selector: "#server_cpu_graph",
+      text_selector: "#server_cpu_text",
+      text_formatter: function (val) { return val.toFixed(0) + "%"; },
+      monitor: shell.cpu_monitor,
+      options: { yaxis: { tickColor: "#e1e6ed",
+                          tickFormatter: function(v) { return v + "%"; },
+                          labelWidth: 45
+                        } },
+      ymax_unit: 100
+    },
+    { selector: "#server_memory_graph",
+      text_selector: "#server_memory_text",
+      text_formatter: function (v) { return cockpit.format_bytes(v); },
+      monitor: shell.mem_monitor,
+      options: { yaxis: { ticks: shell.memory_ticks,
+                          tickColor: "#e1e6ed",
+                          tickFormatter:  function (v) { return cockpit.format_bytes(v); },
+                          labelWidth: 45
+                        }
+               },
+      ymax_unit: 100000000
+    },
+    { selector: "#server_network_traffic_graph",
+      text_selector: "#server_network_traffic_text",
+      text_formatter: function (v) { return cockpit.format_bits_per_sec(v*8); },
+      monitor: shell.net_monitor,
+      options: { yaxis: { tickColor: "#e1e6ed",
+                          tickFormatter:  function (v) { return cockpit.format_bits_per_sec(v*8); },
+                          labelWidth: 45
+                        }
+               },
+      ymax_min: 100000
+    },
+    { selector: "#server_disk_io_graph",
+      text_selector: "#server_disk_io_text",
+      text_formatter: function (v) { return cockpit.format_bytes_per_sec(v); },
+      monitor: shell.disk_monitor,
+      options: { yaxis: { tickColor: "#e1e6ed",
+                          tickFormatter:  function (v) { return cockpit.format_bytes_per_sec(v); },
+                          labelWidth: 45
+                        }
+               },
+      ymax_min: 100000
+    }
+];
+
 PageServer.prototype = {
     _init: function() {
         this.id = "server";
@@ -102,83 +171,157 @@ PageServer.prototype = {
 
         $('#server-avatar').attr('src', "/cockpit/@@shell@@/images/server-large.png");
 
-        function network_setup_hook(plot) {
-            var axes = plot.getAxes();
-            if (axes.yaxis.datamax < 100000)
-                axes.yaxis.options.max = 100000;
-            else
-                axes.yaxis.options.max = null;
-            axes.yaxis.options.min = 0;
+        $('#server-range-buttons button').click(function () {
+            set_plot_x_range(parseInt($(this).data('seconds'), 10));
+        });
+
+        $('#server-scroll-left').click(function () {
+            scroll_plot_left();
+        });
+
+        $('#server-scroll-right').click(function () {
+            scroll_plot_right();
+        });
+
+        $('#server-zoom-out').click(function () {
+            zoom_plot_out();
+        });
+
+        var plot_min_x_range = 5*60;
+
+        var plot_x_range = 5*60;
+        var plot_x_stop;
+
+        function update_scroll_buttons() {
+            $('#server-scroll-right').attr('disabled', plot_x_stop === undefined);
         }
 
-        var monitor = self.client.get("/com/redhat/Cockpit/CpuMonitor",
-                                      "com.redhat.Cockpit.ResourceMonitor");
-        self.cpu_plot =
-            shell.setup_simple_plot("#server_cpu_graph",
-                                      "#server_cpu_text",
-                                      monitor,
-                                      { yaxis: { ticks: 5 } },
-                                      function(values) { // Combines the series into a single plot-value
-                                          return values[1] + values[2] + values[3];
-                                      },
-                                      function(values) { // Combines the series into a textual string
-                                          var total = values[1] + values[2] + values[3];
-                                          return total.toFixed(1) + "%";
-                                      });
+        function plot_reset() {
+            if (plot_x_range < plot_min_x_range) {
+                plot_x_stop += (plot_min_x_range - plot_x_range)/2;
+                plot_x_range = plot_min_x_range;
+            }
+            if (plot_x_stop >= (new Date()).getTime() / 1000 - 10)
+                plot_x_stop = undefined;
 
-        monitor = self.client.get("/com/redhat/Cockpit/MemoryMonitor",
-                                  "com.redhat.Cockpit.ResourceMonitor");
-        self.memory_plot =
-            shell.setup_simple_plot("#server_memory_graph",
-                                      "#server_memory_text",
-                                      monitor,
-                                      { },
-                                      function(values) { // Combines the series into a single plot-value
-                                          return values[1] + values[2] + values[3];
-                                      },
-                                      function(values) { // Combines the series into a textual string
-                                          var total = values[1] + values[2] + values[3];
-                                          return cockpit.format_bytes(total);
-                                      });
-
-        monitor = self.client.get("/com/redhat/Cockpit/NetworkMonitor",
-                                  "com.redhat.Cockpit.ResourceMonitor");
-        self.network_traffic_plot =
-            shell.setup_simple_plot("#server_network_traffic_graph",
-                                      "#server_network_traffic_text",
-                                      monitor,
-                                      { setup_hook: network_setup_hook },
-                                      function(values) { // Combines the series into a single plot-value
-                                          return values[0] + values[1];
-                                      },
-                                      function(values) { // Combines the series into a textual string
-                                          var total = values[0] + values[1];
-                                          return cockpit.format_bits_per_sec(total * 8);
-                                      });
-
-        monitor = self.client.get("/com/redhat/Cockpit/DiskIOMonitor",
-                                  "com.redhat.Cockpit.ResourceMonitor");
-        self.disk_io_plot =
-            shell.setup_simple_plot("#server_disk_io_graph",
-                                      "#server_disk_io_text",
-                                      monitor,
-                                      { },
-                                      function(values) { // Combines the series into a single plot-value
-                                          return values[0] + values[1];
-                                      },
-                                      function(values) { // Combines the series into a textual string
-                                          var total = values[0] + values[1];
-                                          return cockpit.format_bytes_per_sec(total);
-                                      });
-
-
-        shell.util.machine_info(this.address).
-            done(function (info) {
-                // TODO - round memory to something nice and/or adjust
-                //        the ticks.
-                self.cpu_plot.set_yaxis_max(info.cpus*100);
-                self.memory_plot.set_yaxis_max(info.memory);
+            self.plots.forEach(function (p) {
+                p.stop_walking();
+                p.reset(plot_x_range, plot_x_stop);
+                p.refresh();
+                if (plot_x_stop === undefined)
+                    p.start_walking();
             });
+            update_scroll_buttons();
+        }
+
+        function set_plot_x_range(val) {
+            $('#server-range-buttons button').removeClass("active");
+            $('#server-range-buttons button[data-seconds=' + val + ']').addClass("active");
+            plot_x_range = val;
+            plot_x_stop = undefined;
+            plot_reset();
+        }
+
+        function scroll_plot_left() {
+            var step = plot_x_range / 10;
+            if (plot_x_stop === undefined)
+                plot_x_stop = (new Date()).getTime() / 1000;
+            plot_x_stop -= step;
+            plot_reset();
+        }
+
+        function scroll_plot_right() {
+            var step = plot_x_range / 10;
+            if (plot_x_stop !== undefined) {
+                plot_x_stop += step;
+                if (plot_x_stop >= (new Date()).getTime() / 1000 - 10)
+                    plot_x_stop = undefined;
+                plot_reset();
+            }
+        }
+
+        function zoom_plot_start() {
+            if (plot_x_stop === undefined) {
+                self.plots.forEach(function (p) {
+                    p.stop_walking();
+                });
+                plot_x_stop = (new Date()).getTime() / 1000;
+                update_scroll_buttons();
+            }
+        }
+
+        function zoom_plot_in(x_range, x_stop) {
+            $('#server-range-buttons button').removeClass("active");
+            plot_x_range = x_range;
+            plot_x_stop = x_stop;
+            plot_reset();
+        }
+
+        function zoom_plot_out(x_range, x_stop) {
+            var factor = 2.0;
+            $('#server-range-buttons button').removeClass("active");
+            if (plot_x_stop !== undefined)
+                plot_x_stop += (factor/4)*plot_x_range;
+            if (plot_x_stop >= (new Date()).getTime() / 1000 - 10)
+                plot_x_stop = undefined;
+            plot_x_range *= factor;
+            plot_reset();
+        }
+
+        function make_plot(config) {
+
+            function setup_hook(flot) {
+                var axes = flot.getAxes();
+
+                if (config.ymax_unit) {
+                    if (axes.yaxis.datamax)
+                        axes.yaxis.options.max = Math.ceil(axes.yaxis.datamax / config.ymax_unit) * config.ymax_unit;
+                    else
+                        axes.yaxis.options.max = config.ymax_unit;
+                }
+
+                if (config.ymax_min) {
+                    if (axes.yaxis.datamax < config.ymax_min)
+                        axes.yaxis.options.max = config.ymax_min;
+                    else
+                        axes.yaxis.options.max = null;
+                }
+
+                axes.yaxis.options.min = 0;
+            }
+
+            function real_time_callback(val) {
+                $(config.text_selector).text(config.text_formatter(val));
+            }
+
+            var plot = shell.plot($(config.selector), 300);
+            var mon = config.monitor();
+            plot.set_options($.extend({ setup_hook: setup_hook },
+                                      common_plot_options,
+                                      config.options));
+            plot.add_monitor(mon, { real_time_callback: real_time_callback });
+
+            $(plot).on("zoomstart", function (event) { zoom_plot_start(); });
+            $(plot).on("zoom", function (event, x_range, x_stop) { zoom_plot_in(x_range, x_stop); });
+
+            mon.has_archives()
+                .done(function (res) {
+                    if (res) {
+                        var options = plot.get_options();
+                        if (!options.selection) {
+                            options.selection = { mode: "x", color: "#d4edfa" };
+                            plot.set_options(options);
+                            plot.refresh();
+                        }
+                        $("#server-graph-toolbar").show();
+                    }
+                });
+
+            return plot;
+        }
+
+        self.plots = resource_monitors.map(make_plot);
+        set_plot_x_range(plot_x_range);
 
         self.update_avatar ();
 
@@ -259,22 +402,21 @@ PageServer.prototype = {
         $(self.realms).on('notify:Joined.server',
                           $.proxy(self, "update_realms"));
         self.update_realms();
+
+        $(cockpit).on('resize.server', function () {
+            self.plots.forEach(function (p) { p.resize(); });
+        });
+
     },
 
     show: function() {
-        this.cpu_plot.start();
-        this.memory_plot.start();
-        this.disk_io_plot.start();
-        this.network_traffic_plot.start();
+        this.plots.forEach(function (p) { p.resize(); });
     },
 
     leave: function() {
         var self = this;
 
-        self.cpu_plot.destroy();
-        self.memory_plot.destroy();
-        self.disk_io_plot.destroy();
-        self.network_traffic_plot.destroy();
+        self.plots.forEach(function (p) { p.destroy(); });
 
         $(self.manager).off('.server');
         self.manager = null;
@@ -283,6 +425,8 @@ PageServer.prototype = {
         $(self.client).off('.server');
         self.client.release();
         self.client = null;
+
+        $(cockpit).off('.server');
     },
 
     shutdown: function(action_type) {
