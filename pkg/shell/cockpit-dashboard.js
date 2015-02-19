@@ -519,7 +519,7 @@ PageDashboard.prototype = {
                 $(plot).on("changed", function() {
                     if (plot.archives && !options.selection) {
                         $("#dashboard-toolbar").show();
-                        options.selection = { mode: "x" };
+                        options.selection = { mode: "x", color: "#d4edfa" };
                         plot.set_options(options);
                         plot.refresh();
                     }
