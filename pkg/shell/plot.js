@@ -747,7 +747,7 @@ shell.format_date_tick = function format_date_tick(val, axis) {
 
 shell.memory_ticks = function memory_ticks(opts) {
     // Not more than 5 ticks, nicely rounded to powers of 2.
-    var size = Math.pow(2.0, Math.ceil(Math.log2(opts.max/5)));
+    var size = Math.pow(2.0, Math.ceil(Math.log(opts.max/5)/Math.LN2));
     var ticks = [ ];
     for (var t = 0; t < opts.max; t += size)
         ticks.push(t);
