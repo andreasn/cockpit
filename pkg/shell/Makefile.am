@@ -67,6 +67,7 @@ shellimages_DATA = \
 	pkg/shell/images/face-smile.png \
 	pkg/shell/images/storage-disk.png \
 	pkg/shell/images/switcher.png \
+	pkg/shell/images/zoom-out.png \
 	$(NULL)
 
 # -----------------------------------------------------------------------------
