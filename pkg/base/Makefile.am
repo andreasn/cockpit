@@ -9,6 +9,7 @@ base_GEN = \
 	$(NULL)
 base_DATA = \
 	pkg/base/patternfly.css \
+	pkg/base/bootstrap-datetimepicker.min.css \
 	pkg/base/cockpit.css \
 	pkg/base/cockpit.js \
 	pkg/base/cockpit.min.js \
@@ -70,12 +71,16 @@ update-jquery:
 	    $(srcdir)/lib/jquery.v2.1.0.js \
 	    $(srcdir)/lib/bootstrap.v3.0.3.js \
 	    $(srcdir)/lib/bootstrap-select.v1.6.3.js \
+	    $(srcdir)/lib/moment.min.js \
+	    $(srcdir)/lib/bootstrap-datetimepicker.min.js \
 	    $(srcdir)/lib/jquery-flot.v0.7.js \
 	    $(srcdir)/lib/attrchange.js
 	$(srcdir)/tools/jsmerge -o $(srcdir)/pkg/base/jquery.min.js \
 	    $(srcdir)/lib/jquery.v2.1.0.min.js \
 	    $(srcdir)/lib/bootstrap.v3.0.3.min.js \
 	    $(srcdir)/lib/bootstrap-select.v1.6.3.min.js \
+	    $(srcdir)/lib/moment.min.js \
+	    $(srcdir)/lib/bootstrap-datetimepicker.min.js \
 	    $(srcdir)/lib/jquery-flot.v0.7.min.js \
 	    $(srcdir)/lib/attrchange.min.js
 
