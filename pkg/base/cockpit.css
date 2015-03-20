@@ -466,14 +466,6 @@ code, kbd, pre, samp {
     background: #f0f0f0;
 }
 
-
-/* Patternfly doesn't have modal-sm
-*/
-
-.cockpit-modal-sm {
-    width: 300px;
-}
-
 /* Extra content header */
 
 .content-header-extra {
