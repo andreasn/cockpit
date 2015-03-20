@@ -75,7 +75,7 @@ code, kbd, pre, samp {
 /* Container is glued to the navigation and sides */
 
 .container-fluid {
-    margin: 20px;
+    margin-top: 20px;
 }
 
 /* Break up sidebar in columns in smaller sizes*/
@@ -499,4 +499,18 @@ code, kbd, pre, samp {
 /* HACK: Need to update patternfly to work with latest bootstrap-select */
 .bootstrap-select.btn-group .dropdown-menu li a span.check-mark {
   display: none;
+}
+
+/* Override patternfly to fit buttons and such */
+
+.table > thead > tr > th,
+.table > tbody > tr > td {
+    padding: 8px;
+}
+
+/* Override the heavy patternfly headers */
+
+.table > thead {
+    background-image: none;
+    background-color: #fff;
 }
