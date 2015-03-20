@@ -364,6 +364,20 @@ code, kbd, pre, samp {
     padding-right: 15px;
 }
 
+/* Override patternfly to fit buttons and such */
+
+.table > thead > tr > th,
+.table > tbody > tr > td {
+    padding: 8px;
+}
+
+/* Override the heavy patternfly headers */
+
+.table > thead {
+    background-image: none;
+    background-color: #fff;
+}
+
 /* Make things line up */
 .table tbody tr td:first-child,
 .table thead tr th:first-child {
@@ -491,18 +505,4 @@ code, kbd, pre, samp {
 /* HACK: Need to update patternfly to work with latest bootstrap-select */
 .bootstrap-select.btn-group .dropdown-menu li a span.check-mark {
   display: none;
-}
-
-/* Override patternfly to fit buttons and such */
-
-.table > thead > tr > th,
-.table > tbody > tr > td {
-    padding: 8px;
-}
-
-/* Override the heavy patternfly headers */
-
-.table > thead {
-    background-image: none;
-    background-color: #fff;
 }
