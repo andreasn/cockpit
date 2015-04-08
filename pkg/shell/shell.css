@@ -897,9 +897,15 @@ iframe.container-frame {
 
 /*#tools-menu {
   width: 169px;
+  padding-left: 3px;
 }
 
 #tools-menu > .panel > .panel-heading {
   height: auto;
-  padding-left: 5px;
+  padding-left: 0px;
+}
+
+#sidebar-tools > li > a {
+  padding-left: 20px;
 }*/
+
