@@ -1534,11 +1534,11 @@ var ipv6_method_choices =
 
 var bond_mode_choices =
     [
-        { choice: 'balance-rr',    title: _("Round Robin") },
-        { choice: 'active-backup', title: _("Active Backup") },
-        { choice: 'balance-xor',   title: _("XOR") },
-        { choice: 'broadcast',     title: _("Broadcast") },
-        { choice: '802.3ad',       title: _("802.3ad") },
+        { choice: 'balance-rr',    title: _("Round Robin load balancing and fault tolerance") },
+        { choice: 'active-backup', title: _("Active Backup fault tolerance") },
+        { choice: 'balance-xor',   title: _("XOR load balancing and fault tolerance") },
+        { choice: 'broadcast',     title: _("Broadcast fault tolerance") },
+        { choice: '802.3ad',       title: _("802.3ad dynamic link aggregation") },
         { choice: 'balance-tlb',   title: _("Adaptive transmit load balancing") },
         { choice: 'balance-alb',   title: _("Adaptive load balancing") }
     ];
