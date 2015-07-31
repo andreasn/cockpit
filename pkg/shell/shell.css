@@ -372,6 +372,10 @@ ul.available-interfaces-group {
     min-height: 28px;
 }
 
+#authorized-keys-text {
+    height: 200px;
+}
+
 /* Align with the top of the graphs
   only when not wrapped
 */
