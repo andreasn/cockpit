@@ -367,6 +367,11 @@ ul.available-interfaces-group {
     width: 28px;
 }
 
+#authorized-key-add {
+    min-width: 28px;
+    min-height: 28px;
+}
+
 /* Align with the top of the graphs
   only when not wrapped
 */
