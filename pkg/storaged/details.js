@@ -22,11 +22,12 @@ define([
     "base1/cockpit",
     "base1/mustache",
     "system/server",
+    "system/service",
     "shell/shell",
     "storage/utils",
     "storage/dialog",
     "storage/permissions"
-], function($, cockpit, mustache, server, shell, utils, dialog, permissions) {
+], function($, cockpit, mustache, server, service, shell, utils, dialog, permissions) {
     var _ = cockpit.gettext;
     var C_ = cockpit.gettext;
 
@@ -1129,7 +1130,7 @@ define([
         mustache.parse(content_tmpl);
 
         /* Content entry creation.
-           XXX - make this more functional, without gloabl state
+           XXX - make this more functional, without global state
         */
 
         var entries = [ ];
