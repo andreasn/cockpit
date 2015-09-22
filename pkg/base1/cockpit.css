@@ -496,3 +496,8 @@ a {
 .navbar-pf .navbar-brand:hover {
     color: #F1F1F1;
 }
+
+/* Make button in alerts fit. Workaround for Patternfly issue #122 */
+.alert .btn-default {
+    margin-top: -3px;
+}
