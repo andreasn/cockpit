@@ -2,6 +2,7 @@ shelldir = $(pkgdatadir)/shell
 nodist_shell_DATA = \
 	pkg/shell/shell.min.js.gz \
 	pkg/shell/bundle.min.js.gz \
+	pkg/shell/plot.min.css.gz \
 	pkg/shell/shell.min.css.gz \
 	pkg/shell/shell.min.html.gz \
 	$(NULL)
@@ -22,6 +23,7 @@ shelldebug_DATA = \
 	pkg/shell/index.html \
 	pkg/shell/index.js \
 	pkg/shell/machines.js \
+	pkg/shell/plot.css \
 	pkg/shell/shell.css \
 	pkg/shell/shell.html \
 	pkg/shell/dbus.js \
@@ -81,6 +83,7 @@ TESTS += $(shell_TESTS)
 # ----------------------------------------------------------------------------------------------------
 
 CLEANFILES += \
+	pkg/shell/plot.min.css \
 	pkg/shell/shell.min.css \
 	pkg/shell/shell.min.js \
 	pkg/shell/bundle.min.js \
@@ -92,6 +95,7 @@ CLEANFILES += \
 	$(NULL)
 
 EXTRA_DIST += \
+	pkg/shell/plot.min.css \
 	pkg/shell/shell.min.css \
 	pkg/shell/shell.min.js \
 	pkg/shell/bundle.min.js \
