@@ -195,29 +195,70 @@ PageServer.prototype = {
             $('#system_information_systime_button').text(self.server_time.format(true));
         });
 
-        var ntp_status_tmpl = $("#ntp-status-tmpl").html();
+        self.ntp_status_tmpl = $("#ntp-status-tmpl").html();
         Mustache.parse(this.ntp_status_tmpl);
 
         function update_ntp_status() {
-            var status = (self.server_time.timesyncd_service.service &&
-                          self.server_time.timesyncd_service.service.StatusText);
+            var $elt = $('#system_information_systime_ntp_status');
 
-            if (!status || status === "") {
-                $('#system_information_systime_ntp_status').html("");
+            if (!self.server_time.timedate.NTP) {
+                $elt.hide();
+                $elt.popover('hide');
                 return;
             }
 
-            if (status == "Idle.")
-                status = null;
+            $elt.show();
 
             var model = {
-                TimesyncdStatus: status
+                Synched: self.server_time.timedate.NTPSynchronized
             };
-            $('#system_information_systime_ntp_status').html(Mustache.render(ntp_status_tmpl, model));
+
+            var timesyncd_server_regex = /Using Time Server (.*)./;
+
+            var timesyncd_status = (self.server_time.timesyncd_service.state == "running" &&
+                                    self.server_time.timesyncd_service.service &&
+                                    self.server_time.timesyncd_service.service.StatusText);
+
+            if (timesyncd_status) {
+                var match = timesyncd_status.match(timesyncd_server_regex);
+                if (match)
+                    model.Server = match[1];
+                else if (timesyncd_status != "Idle." && timesyncd_status !== "")
+                    model.SubStatus = timesyncd_status;
+            }
+
+            var status = Mustache.render(self.ntp_status_tmpl, model);
+
+            if (status != $elt.attr('data-content')) {
+                $elt.attr("data-content", status);
+                // Refresh the popover if it is open
+                if ($elt.data('bs.popover').tip().hasClass('in'))
+                    $elt.popover('show');
+            }
         }
 
+        $('#system_information_systime_ntp_status').popover();
+
         $(self.server_time.timesyncd_service).on("changed", update_ntp_status);
+        $(self.server_time.timedate).on("changed", update_ntp_status);
         update_ntp_status();
+
+        /* NTPSynchronized needs to be polled so we do that while the
+         * popup is open.
+         */
+
+        var poll_id;
+
+        $('#system_information_systime_ntp_status').on('show.bs.popover', function() {
+            self.server_time.timedate.poll();
+            poll_id = window.setInterval(function () {
+                self.server_time.timedate.poll();
+            }, 1000);
+        });
+
+        $('#system_information_systime_ntp_status').on('hide.bs.popover', function() {
+            window.clearInterval(poll_id);
+        });
 
         self.plot_controls = shell.setup_plot_controls($('#server'), $('#server-graph-toolbar'));
 
