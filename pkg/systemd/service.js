@@ -170,29 +170,10 @@ define([
         });
 
         function refresh() {
-            if (!unit || !service)
-                return;
-
-            function refresh_interface(path, iface) {
-                systemd_client.call(path,
-                                    "org.freedesktop.DBus.Properties", "GetAll", [ iface ]).
-                    fail(function (error) {
-                        console.log(error);
-                    }).
-                    done(function (result) {
-                        var props = { };
-                        for (var p in result[0])
-                            props[p] = result[0][p].v;
-                        var ifaces = { };
-                        ifaces[iface] = props;
-                        var data = { };
-                        data[unit.path] = ifaces;
-                        systemd_client.notify(data);
-                    });
-            }
-
-            refresh_interface(unit.path, "org.freedesktop.systemd1.Unit");
-            refresh_interface(service.path, "org.freedesktop.systemd1.Service");
+            if (unit)
+                unit.poll();
+            if (service)
+                service.poll();
         }
 
         /* HACK - https://bugs.freedesktop.org/show_bug.cgi?id=69575
