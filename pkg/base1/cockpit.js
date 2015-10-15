@@ -1442,6 +1442,7 @@ function full_scope(cockpit, $, po) {
                       enumerable: false, writable: false },
             "call": { value: function(name, args) { return client.call(path, iface, name, args); },
                       enumerable: false, writable: false },
+            "poll": { value: function() { return client.poll(path, iface); } },
             "data": { value: { }, enumerable: false }
         });
 
@@ -1851,6 +1852,29 @@ function full_scope(cockpit, $, po) {
                 path_namespace = "/";
             ensure_cache();
             return new DBusProxies(self, cache, String(iface), String(path_namespace));
+        };
+
+        self.poll = function poll(path, iface) {
+            var dfd = $.Deferred();
+
+            self.call(path,
+                      "org.freedesktop.DBus.Properties", "GetAll", [ iface ]).
+                done(function (result) {
+                    var props = { };
+                    for (var p in result[0])
+                        props[p] = result[0][p].v;
+                    var ifaces = { };
+                    ifaces[iface] = props;
+                    var data = { };
+                    data[path] = ifaces;
+                    self.notify(data);
+                    dfd.resolve();
+                }).
+                fail(function (error) {
+                    dfd.reject(error);
+                });
+
+            return dfd.promise();
         };
 
     }
