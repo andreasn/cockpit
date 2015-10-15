@@ -198,6 +198,9 @@ PageServer.prototype = {
         self.ntp_status_tmpl = $("#ntp-status-tmpl").html();
         Mustache.parse(this.ntp_status_tmpl);
 
+        self.ntp_status_icon_tmpl = $("#ntp-status-icon-tmpl").html();
+        Mustache.parse(this.ntp_status_icon_tmpl);
+
         function update_ntp_status() {
             var $elt = $('#system_information_systime_ntp_status');
 
@@ -227,14 +230,16 @@ PageServer.prototype = {
                     model.SubStatus = timesyncd_status;
             }
 
-            var status = Mustache.render(self.ntp_status_tmpl, model);
-
-            if (status != $elt.attr('data-content')) {
-                $elt.attr("data-content", status);
+            var popover_html = Mustache.render(self.ntp_status_tmpl, model);
+            if (popover_html != $elt.attr('data-content')) {
+                $elt.attr("data-content", popover_html);
                 // Refresh the popover if it is open
                 if ($elt.data('bs.popover').tip().hasClass('in'))
                     $elt.popover('show');
             }
+
+            var icon_html = Mustache.render(self.ntp_status_icon_tmpl, model);
+            $elt.html(icon_html);
         }
 
         $('#system_information_systime_ntp_status').popover();
