@@ -18,9 +18,11 @@ bower.json
 CHANGES*
 CHANGELOG*
 CONTRIBUTING*
+Gruntfile.js
 History*
 package.js
 package.json
+npm-shrinkwrap.json
 QUICKSTART*
 Rakefile
 README*
@@ -63,6 +65,8 @@ tests-src/
 /patternfly/components/bootstrap-select/js/
 /patternfly/components/bootstrap-select/dist/css/
 /patternfly/components/bootstrap-select/dist/js/i18n/
+/patternfly/components/bootstrap-switch/
+/patternfly/components/bootstrap-touchspin/
 /patternfly/components/bootstrap-treeview/
 /patternfly/components/c3/
 /patternfly/components/datatables*/
