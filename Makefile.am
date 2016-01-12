@@ -231,10 +231,10 @@ upload-pot:
 download-po:
 	zanata-cli -B pull --min-doc-percent 30 --project-config "$(srcdir)/tools/zanata.xml" -s "$(builddir)/po" -t "$(srcdir)/po"
 
-BOWER = $(srcdir)/tools/bower_components
+BOWER = $(srcdir)/bower_components
 
 update-bower:
-	( cd $(srcdir)/tools && ./bower update )
+	( cd $(srcdir) && bower update )
 
 include pkg/base1/Makefile.am
 include pkg/dashboard/Makefile.am
