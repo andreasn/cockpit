@@ -116,7 +116,7 @@ class TestStorage(StorageCase):
         # create a logical volume
         self.content_default_action(1, "Create Plain Logical Volume")
         self.dialog({ "name": "one",
-                      "size": "20" })
+                      "size": 20 })
         b.wait_in_text("#content", "Logical Volume \"one\"")
 
         # format and mount it
@@ -148,12 +148,12 @@ class TestStorage(StorageCase):
         # create thin pool and volume
         self.content_action(1, "Create Pool for Thin Logical Volumes")
         self.dialog({ "name": "pool",
-                      "size": "20" })
+                      "size": 20 })
         b.wait_in_text('#content', "Pool for Thin Logical Volumes \"pool\"")
 
         self.content_default_action(1, "Create Thin Volume")
         self.dialog({ "name": "thin",
-                      "size": "80" })
+                      "size": 80 })
         b.wait_in_text('#content', "Thin Logical Volume \"thin\"")
 
         # cause the pool to overflow by erasing the thin volume
@@ -176,7 +176,7 @@ class TestStorage(StorageCase):
         b.wait_in_text("#pvols", "DISK2")
 
         self.content_action(1, "Resize")
-        self.dialog({ "size": "80" })
+        self.dialog({ "size": 80 })
         b.wait_in_text("#content", "(ext4 File System)")
         self.wait_in_storaged_configuration(mount_point_thin)
 

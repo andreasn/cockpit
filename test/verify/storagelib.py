@@ -78,6 +78,10 @@ class StorageCase(MachineCase):
         elif isinstance(val, dict):
             for label in val:
                 self.dialog_select(field, label, val[label])
+        elif isinstance(val, int):
+            # size slider
+            self.browser.set_val(self.dialog_field(field) + " select.size-unit", "1048576")
+            self.browser.set_val(self.dialog_field(field) + " input.size-text", str(val))
         else:
             self.browser.set_val(self.dialog_field(field), val)
 
