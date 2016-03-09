@@ -151,6 +151,12 @@
     text-overflow: ellipsis;
 }
 
+/* Display properly when there are several tags */
+#image-details .panel-heading {
+   min-height: 44px;
+   height: auto;
+}
+
 .image-col-tags {
     width: 40%;
 }

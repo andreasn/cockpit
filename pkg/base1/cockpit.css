@@ -291,8 +291,7 @@ a {
 }
 
 .panel-heading {
-   min-height: 44px;
-   height: auto;
+   height: 44px;
 }
 
 /* Vertically center dropdown buttons in panel headers */
