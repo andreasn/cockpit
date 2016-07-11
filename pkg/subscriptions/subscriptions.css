@@ -19,21 +19,29 @@
 
 /* ---------------------------------------------------------------------------------------------------- */
 
+.subscription-status-ct label {
+    font-size: 13px;
+}
+
+.subscription-status-ct button {
+    margin-left: 12px;
+}
+
 .container-fluid.alert {
     margin: 20px;
 }
 
-#subscriptions-register {
+/*#subscriptions-register {
     display: block;
     margin: 0px auto;
-}
+}*/
 
-.subscriptions-block-center {
+/*.subscriptions-block-center {
     display: block;
     text-align: center;
-}
+}*/
 
-#registration-url-field > .bootstrap-select {
+#subscription-register-url {
     margin-bottom: 3px;
 }
 
@@ -46,8 +54,21 @@
     white-space: nowrap;
     color: #888888;
     width: 5px; /* will be expanded by nowrap */
+    padding-right: 7px;
 }
 
 .form-td-ct-subscriptions {
     width: 80px;
+}
+
+#subscription-proxy-use {
+    vertical-align: sub;
+}
+
+.form-table-ct .form-inline {
+    background: #f4f4f4;
+    border-width: 0 1px 1px 1px;
+    border-style: solid;
+    border-color: #bababa;
+    padding: 4px;
 }
