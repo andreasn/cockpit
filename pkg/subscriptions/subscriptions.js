@@ -39,28 +39,39 @@ require([
     var register_url = "default";
 
     function register_system() {
-        var url = null;
         var ex, errors = [];
+        var subscription_details = {};
+
+        subscription_details.url = null;
         if (register_url != "default")
-          url = $('#subscription-register-url-custom').val().trim();
-        var username = $('#subscription-register-username').val();
-        if (username === '') {
-            ex = new Error(_("Login cannot be empty"));
-            ex.target = "#subscription-register-username";
+            subscription_details.url = $('#subscription-register-url-custom').val().trim();
+
+        subscription_details.activation_key = $('#subscription-register-key').val();
+
+        subscription_details.username = $('#subscription-register-username').val();
+        subscription_details.password = $('#subscription-register-password').val();
+        if ((subscription_details.username === '' || subscription_details.password === '') &&
+            subscription_details.activation_key === '') {
+            ex = new Error(_("Username/Password or activation key required"));
+            if (subscription_details.password === '')
+                ex.target = "#subscription-register-password";
+            else
+                ex.target = "#subscription-register-username";
             errors.push(ex);
         }
-        var password = $('#subscription-register-password').val();
-        if (password === '') {
-            ex = new Error(_("Password cannot be empty"));
-            ex.target = "#subscription-register-password";
-            errors.push(ex);
-        }
-        var org = $('#subscription-register-org').val();
+
+        subscription_details.org = $('#subscription-register-org').val();
 
         $("#subscriptions-register-dialog").dialog("failure", errors);
 
+        if ($("#subscription-proxy-server-row").is(':visible')) {
+            subscription_details.proxy_server = $('#subscription-proxy-server').val();
+            subscription_details.proxy_user = $('#subscription-proxy-user').val();
+            subscription_details.proxy_pass = $('#subscription-proxy-password').val();
+        }
+
         if (!errors.length)
-            subscriptions.manager.register_system(url, username, password, org);
+            subscriptions.manager.register_system(subscription_details);
     }
 
     function register_dialog_initialize() {
@@ -383,20 +394,32 @@ require([
             return Mustache.render("{{text}}", { 'text': message });
         }
 
-        function perform_register(url, username, password, org) {
+        function perform_register(subscription_details) {
             var deferred = $.Deferred();
 
-            var args = ['subscription-manager', 'register', '--auto-attach'];
-            if (url !== null)
-                args.push('--serverurl', url);
-            /* if username or password are empty, subscription-manager will prompt for them
-             * so we always need to pass them
-             */
-            args.push('--username', username, '--password', password);
+            var args = ['subscription-manager', 'register'];
+            if (subscription_details.url !== null)
+                args.push('--serverurl', subscription_details.url);
+
+            // activation keys can't be used with auto-attach
+            if (subscription_details.activation_key)
+                args.push('--activationkey', subscription_details.activation_key);
+            else
+                args.push('--auto-attach');
+
+            if (subscription_details.username || subscription_details.password)
+                args.push('--username', subscription_details.username, '--password', subscription_details.password);
+
+            // proxy is optional
+            if (subscription_details.proxy_server) {
+                args.push('--proxy', subscription_details.proxy_server,
+                          '--proxyuser', subscription_details.proxy_user,
+                          '--proxypass', subscription_details.proxy_pass);
+            }
 
             // only pass org info if user provided it
-            if (org)
-                args.push('--org', org);
+            if (subscription_details.org)
+                args.push('--org', subscription_details.org);
 
             deferred.notify(_("Registering system..."));
 
@@ -477,7 +500,7 @@ require([
             return promise;
         }
 
-        function register_system(url, username, password, org) {
+        function register_system(subscription_details) {
             if (action_in_progress()) {
                 console.log(_('Unable to register at this time because a call to subscription manager ' +
                   'is already in progress. Please try again.'));
@@ -488,7 +511,7 @@ require([
             $('#subscriptions-register-password-note-details').hide();
             $('#subscriptions-register-org-note-details').hide();
 
-            var promise = perform_register(url, username, password, org);
+            var promise = perform_register(subscription_details);
             $("#subscriptions-register-dialog").dialog("wait", promise);
 
             promise
@@ -600,6 +623,16 @@ require([
             register_url = $(this).attr("value");
             $("#subscription-register-url button span").text($(this).text());
             register_url_changed();
+        });
+
+        $("#subscription-proxy-toggle").on("click", function(event) {
+            // don't actually navigate
+            event.preventDefault();
+
+            $("#subscription-proxy-server-row").toggle();
+            $("#subscription-proxy-user-row").toggle();
+            $("#subscription-proxy-password-row").toggle();
+            $("#subscription-proxy-caret").toggleClass("fa-angle-right").toggleClass("fa-angle-down");
         });
 
         register_url = "default";

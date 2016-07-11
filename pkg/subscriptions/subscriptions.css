@@ -40,3 +40,14 @@
 #subscriptions-registering > span {
     margin-left: 7px;
 }
+
+.form-tr-ct-title  {
+    text-align: right;
+    white-space: nowrap;
+    color: #888888;
+    width: 5px; /* will be expanded by nowrap */
+}
+
+.form-td-ct-subscriptions {
+    width: 80px;
+}

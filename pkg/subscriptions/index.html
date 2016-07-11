@@ -109,7 +109,7 @@ along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
                     URL
                   </label>
                 </td>
-                <td id="registration-url-field" class="dialog-wrapper">
+                <td id="registration-url-field" class="dialog-wrapper" colspan="2">
                     <div class="btn-group bootstrap-select dropdown form-control" id="subscription-register-url">
                         <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
                             <span class="pull-left" translatable="yes">Default</span>
@@ -126,11 +126,57 @@ along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
               </tr>
               <tr>
                 <td class="top">
+                  <label class="control-label top" translatable="yes">
+                    Proxy
+                  </label>
+                </td>
+                <td colspan="2">
+                  <span id="subscription-proxy-caret" class="fa fa-angle-right"></span>
+                  <a href="#" id="subscription-proxy-toggle" translatable="yes">
+                    use proxy server
+                  </a>
+                </td>
+              </tr>
+              <tr id="subscription-proxy-server-row" hidden>
+                <td></td>
+                <td class="top form-td-ct-subscriptions">
+                  <label class="control-label top form-tr-ct-title" for="subscription-proxy-server" translatable="yes">
+                    Server
+                  </label>
+                </td>
+                <td>
+                  <input id="subscription-proxy-server" class="form-control" type="text" placeholder="hostname:port">
+                </td>
+              </tr>
+              <tr id="subscription-proxy-user-row" hidden>
+                <td></td>
+                <td class="top form-td-ct-subscriptions">
+                  <label class="control-label top form-tr-ct-title" for="subscription-proxy-user" translatable="yes">
+                    User
+                  </label>
+                </td>
+                <td>
+                  <input id="subscription-proxy-user" class="form-control" type="text">
+                </td>
+              </tr>
+              <tr id="subscription-proxy-password-row" hidden>
+                <td></td>
+                <td class="top form-td-ct-subscriptions">
+                  <label class="control-label top form-tr-ct-title" for="subscription-proxy-password" translatable="yes">
+                    Password
+                  </label>
+                </td>
+                <td>
+                  <input id="subscription-proxy-password" class="form-control" type="password">
+                </td>
+              </tr>
+              <tr>
+                <td class="top">
                   <label class="control-label" for="subscription-register-username" translatable="yes">
                     Login
                   </label>
                 </td>
-                <td>
+                <td colspan="2">
                   <input id="subscription-register-username" class="form-control" type="text">
                 </td>
               </tr>
@@ -140,9 +186,20 @@ along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
                     Password
                   </label>
                 </td>
-                <td>
+                <td colspan="2">
                   <input id="subscription-register-password" class="form-control" type="password">
                   <span id="subscriptions-register-password-note-details"></span>
+                </td>
+              </tr>
+              <tr>
+                <td class="top">
+                  <label class="control-label" for="subscription-register-key" translatable="yes">
+                    Activation Key
+                  </label>
+                </td>
+                <td colspan="2">
+                  <input id="subscription-register-key" class="form-control" type="text" placeholder="key_one,key_two">
+                  <span id="subscriptions-register-key-note-details"></span>
                 </td>
               </tr>
               <tr>
@@ -151,7 +208,7 @@ along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
                     Organization
                   </label>
                 </td>
-                <td>
+                <td colspan="2">
                   <input id="subscription-register-org" class="form-control" type="text" placeholder="usually optional">
                   <span id="subscriptions-register-org-note-details"></span>
                 </td>
