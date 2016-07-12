@@ -67,7 +67,7 @@ define([
                         <tbody>
                             <tr>
                                 <td>
-                                    <label className="control-label form-tr-ct-title" for="subscription-proxy-server">
+                                    <label className="control-label" for="subscription-proxy-server">
                                         {_("Server")}
                                     </label>
                                 </td>
@@ -79,7 +79,7 @@ define([
 
                             <tr>
                                 <td>
-                                    <label className="control-label form-tr-ct-title" for="subscription-proxy-user">
+                                    <label className="control-label" for="subscription-proxy-user">
                                         {_("User")}
                                     </label>
                                 </td>
@@ -91,7 +91,7 @@ define([
 
                             <tr>
                                 <td>
-                                    <label className="control-label form-tr-ct-title" for="subscription-proxy-password">
+                                    <label className="control-label" for="subscription-proxy-password">
                                         {_("Password")}
                                     </label>
                                 </td>
