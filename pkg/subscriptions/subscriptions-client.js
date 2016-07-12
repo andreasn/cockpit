@@ -184,17 +184,17 @@ client.registerSystem = function(subscriptionDetails) {
             var invalidUsernameString = 'Invalid username or password.';
             var invalidCredentialsString = 'Invalid Credentials';
             var message = buffer.trim();
-            if (buffer.indexOf(invalidUsernameString) === 0) {
+            if (message.indexOf(invalidUsernameString) !== -1) {
                 message = buffer.substring(invalidUsernameString.length).trim();
-            } else if (buffer.indexOf(invalidCredentialsString) === 0) {
-                message = buffer.substring(invalidCredentialsString.length).trim();
-            } else if ((buffer.indexOf('EOF') === 0) && (buffer.indexOf('Organization: ') !== -1)) {
+            } else if (message.indexOf(invalidCredentialsString) !== -1) {
+                message = message.substring(invalidCredentialsString.length).trim();
+            } else if ((message.indexOf('EOF') === 0) && (message.indexOf('Organization: ') !== -1)) {
                 message = _("'Organization' required to register.");
-            } else if ((buffer.indexOf('EOF') === 0) && (buffer.indexOf('Username: ') !== -1)) {
+            } else if ((message.indexOf('EOF') === 0) && (message.indexOf('Username: ') !== -1)) {
                 message = _("Login/password or activation key required to register.");
-            } else if (buffer.indexOf('Must provide --org with activation keys') !== -1) {
+            } else if (message.indexOf('Must provide --org with activation keys') !== -1) {
                 message = _("'Organization' required when using activation keys.");
-            } else if (buffer.indexOf('The system has been registered') === 0) {
+            } else if (message.indexOf('The system has been registered') !== -1) {
                 /*
                  * Currently we don't separate registration & subscription.
                  * Our auto-attach may have failed, so close the dialog and
