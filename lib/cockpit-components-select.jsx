@@ -47,7 +47,10 @@ define([
             };
         },
         loseFocus: function(ev) {
-            this.setState({ open: false });
+            var self = this;
+            window.setTimeout(function() {
+                self.setState({ open: false });
+            }, 100);
         },
         clickHandler: function(ev) {
             // only consider clicks with the primary button
@@ -96,9 +99,8 @@ define([
             if (this.state.open)
                 classes += " open";
 
-            // use onMouseDown here instead of onClick so we catch a click on the items before we lose focus and close
             return (
-                <div className={classes} onMouseDown={this.clickHandler} id={this.props.id}>
+                <div className={classes} onClick={this.clickHandler} id={this.props.id}>
                     <button className="btn btn-default dropdown-toggle" type="button" onBlur={this.loseFocus}>
                         <span className="pull-left">{currentValue}</span>
                         <span className="caret"></span>
