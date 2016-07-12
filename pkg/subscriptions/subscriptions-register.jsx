@@ -62,7 +62,49 @@ define([
             var proxy;
             if (this.props.proxy) {
                 proxy = [
-                    <tr>
+                    <br />,
+                    <table className="form-group-ct">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <label className="control-label form-tr-ct-title" for="subscription-proxy-server">
+                                        {_("Server")}
+                                    </label>
+                                </td>
+                                <td><input className="form-control" id="subscription-proxy-server" type="text"
+                                           placeholder="hostname:port" value={this.props.proxyServer}
+                                           onChange={this.props.onChange.bind(this, 'proxyServer')}/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <label className="control-label form-tr-ct-title" for="subscription-proxy-user">
+                                        {_("User")}
+                                    </label>
+                                </td>
+                                <td><input className="form-control" id="subscription-proxy-user" type="text"
+                                           value={this.props.proxyUser}
+                                           onChange={this.props.onChange.bind(this, 'proxyUser')}/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <label className="control-label form-tr-ct-title" for="subscription-proxy-password">
+                                        {_("Password")}
+                                    </label>
+                                </td>
+                                <td><input className="form-control" id="subscription-proxy-password" type="password"
+                                           value={this.props.proxyPassword}
+                                           onChange={this.props.onChange.bind(this, 'proxyPassword')}/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                ];
+      /*
+      <tr>
                         <td />
                         <td className="top form-td-ct-subscriptions">
                             <label className="control-label form-tr-ct-title" for="subscription-proxy-server">
@@ -101,7 +143,7 @@ define([
                                    onChange={this.props.onChange.bind(this, 'proxyPassword')}/>
                         </td>
                     </tr>
-                ];
+      */
             }
             return (
                 <div className="modal-body">
@@ -112,7 +154,7 @@ define([
                                     {_("URL")}
                                 </label>
                             </td>
-                            <td colSpan="2">
+                            <td>
                                 <Select.Select key='urlSource' onChange={ this.props.onChange.bind(this, 'url') }
                                                id="subscription-register-url" initial={this.props.url}>
                                     <Select.SelectEntry data='default' key='default'>{_("Default")}</Select.SelectEntry>
@@ -127,22 +169,22 @@ define([
                                     {_("Proxy")}
                                 </label>
                             </td>
-                            <td colSpan="2">
+                            <td>
                                 <label>
                                     <input id="subscription-proxy-use" type="checkbox" checked={this.props.proxy}
                                            onChange={ this.props.onChange.bind(this, 'proxy') }/>
                                     {_("use proxy server")}
                                 </label>
+                                {proxy}
                             </td>
                         </tr>
-                        {proxy}
                         <tr>
                             <td className="top ">
                                 <label className="control-label" for="subscription-register-username">
                                     {_("Login")}
                                 </label>
                             </td>
-                            <td colSpan="2">
+                            <td>
                                 <input id="subscription-register-username" className="form-control" type="text"
                                        value={this.props.user}
                                        onChange={this.props.onChange.bind(this, 'user')}/>
@@ -154,7 +196,7 @@ define([
                                     {_("Password")}
                                 </label>
                             </td>
-                            <td colSpan="2">
+                            <td>
                                 <input id="subscription-register-password" className="form-control" type="password"
                                        value={this.props.password}
                                        onChange={this.props.onChange.bind(this, 'password')}/>
@@ -166,7 +208,7 @@ define([
                                     {_("Activation Key")}
                                 </label>
                             </td>
-                            <td colSpan="2">
+                            <td>
                                 <input id="subscription-register-key" className="form-control" type="text"
                                        placeholder="key_one,key_two" value={this.props.activationKeys}
                                        onChange={this.props.onChange.bind(this, 'activationKeys')}/>
@@ -178,7 +220,7 @@ define([
                                     {_("Organization")}
                                 </label>
                             </td>
-                            <td colSpan="2">
+                            <td>
                                 <input id="subscription-register-org" className="form-control" type="text"
                                        value={this.props.org}
                                        onChange={this.props.onChange.bind(this, 'org')}/>

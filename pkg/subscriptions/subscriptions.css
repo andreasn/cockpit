@@ -72,3 +72,12 @@
     border-color: #bababa;
     padding: 4px;
 }
+
+.form-group-ct {
+    background: #f4f4f4;
+    border-width: 0 1px 1px 1px;
+    border-style: solid;
+    border-color: #bababa;
+    padding: 4px;
+    width: 100%;
+}

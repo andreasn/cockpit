@@ -185,12 +185,12 @@ client.registerSystem = function(subscriptionDetails) {
             var invalidCredentialsString = 'Invalid Credentials';
             var message = buffer.trim();
             if (message.indexOf(invalidUsernameString) !== -1) {
-                message = buffer.substring(invalidUsernameString.length).trim();
+                message = cockpit.format("$0 ($1)", _("Invalid username or password"), message.substring(invalidUsernameString.length).trim());
             } else if (message.indexOf(invalidCredentialsString) !== -1) {
-                message = message.substring(invalidCredentialsString.length).trim();
-            } else if ((message.indexOf('EOF') === 0) && (message.indexOf('Organization: ') !== -1)) {
+                message = cockpit.format("$0 ($1)", _("Invalid credentials"), message.substring(invalidCredentialsString.length).trim());
+            } else if ((message.indexOf('EOF') === 0) && (message.indexOf('Organization:') !== -1)) {
                 message = _("'Organization' required to register.");
-            } else if ((message.indexOf('EOF') === 0) && (message.indexOf('Username: ') !== -1)) {
+            } else if ((message.indexOf('EOF') === 0) && (message.indexOf('Username:') !== -1)) {
                 message = _("Login/password or activation key required to register.");
             } else if (message.indexOf('Must provide --org with activation keys') !== -1) {
                 message = _("'Organization' required when using activation keys.");
