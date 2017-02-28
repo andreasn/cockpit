@@ -389,6 +389,17 @@ PageServer.prototype = {
             machine_id.close();
         });
 
+        cockpit.file("/etc/motd").watch(function (content) {
+            if (content)
+                content = $.trim(content);
+            if (content) {
+                $('#motd').text(content);
+                $('#motd-box').show();
+            } else {
+                $('#motd-box').hide();
+            }
+        });
+
         self.ostree_client = cockpit.dbus('org.projectatomic.rpmostree1',
                                           {"superuser" : true});
         $(self.ostree_client).on("close", function () {
