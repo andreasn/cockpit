@@ -1,0 +1,103 @@
+#!/usr/bin/env python
+# This file is part of Cockpit.
+#
+# Copyright (C) 2017 Red Hat, Inc.
+#
+# Cockpit is free software; you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation; either version 2.1 of the License, or
+# (at your option) any later version.
+#
+# Cockpit is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
+
+import argparse
+import os
+import subprocess
+import sys
+
+from common import testvm
+from common import testinfra
+from common.testlib import wait
+
+BASE = os.path.dirname(__file__)
+
+parser = argparse.ArgumentParser(description='Run a demo machine for SELinux')
+parser.add_argument('-v', '--verbose', action='store_true', help='Display verbose details')
+parser.add_argument('-s', '--setup', action='store_true', help='Setup the demo machine')
+
+parser.add_argument('image', nargs='?', default="rhel-7", help='The image to run')
+args = parser.parse_args()
+
+# from verify/netlib.py
+def get_iface(m, mac):
+    def getit():
+        path = m.execute("grep -li '%s' /sys/class/net/*/address" % mac)
+        return path.split("/")[-2]
+    iface = wait(getit).strip()
+    print "%s -> %s" % (mac, iface)
+    return iface
+
+# from verify/netlib.py
+def add_iface(m, mac=None, vlan=0, activate=True):
+    mac = m.add_netiface(mac=mac, vlan=vlan)
+    # Wait for the interface to show up
+    get_iface(m, mac)
+    # Trigger udev to make sure that it has been renamed to its final name
+    m.execute("udevadm trigger && udevadm settle")
+    iface = get_iface(m, mac)
+    wait(lambda: m.execute('nmcli device | grep %s | grep -v unavailable' % iface))
+    if activate:
+        m.execute("nmcli con add type ethernet ifname %s" % iface)
+        m.execute("nmcli dev con %s" % iface)
+    return iface
+
+try:
+    os.chdir(BASE)
+    machine = testvm.VirtMachine(verbose=args.verbose, image=args.image)
+
+    # Check that things are configured
+    with open(os.devnull, 'w') as fp:
+        if subprocess.call(["ip", "address", "show", "dev", "cockpit1"], stdout=fp, stderr=fp) != 0:
+            raise Exception("vm-run: please run: sudo {0}/vm-prep".format(BASE))
+
+    # Check that image is downloaded
+    if not os.path.exists(machine.image_base):
+        ret = subprocess.call(["./vm-download", args.image])
+        if ret != 0:
+            sys.exit(ret)
+
+    if args.setup:
+        # prepare the machine
+        machine.start(maintain=True)
+        # make sure machine has repos
+        machine.upload([ os.path.expanduser("~/.rhel") ], "/root/")
+        machine.execute(command="cp /root/.rhel/extras-7.3.4.repo /etc/yum.repos.d/")
+        machine.execute(command="yum -y install httpd setroubleshoot-server cockpit cockpit-bridge cockpit-dashboard cockpit-doc cockpit-docker cockpit-machines cockpit-pcp cockpit-storaged cockpit-system cockpit-ws")
+        machine.execute(command="systemctl enable httpd && systemctl start httpd")
+        machine.stop()
+        sys.exit(0)
+
+    # we don't need a console right away
+    machine.start(maintain=False)
+
+    # add disks
+    machine.add_disk("100M", serial="DISK1")
+    machine.add_disk("100M", serial="DISK2")
+
+    # add network adapters
+    add_iface(machine)
+    add_iface(machine, vlan=1, activate=False)
+
+    # open the console
+    print >> sys.stderr, "Debug console, use root:foobar to log in, Ctrl+5 to kill"
+    proc = subprocess.Popen("virsh -c qemu:///session console %s" % machine._domain.ID(), shell=True)
+    proc.wait()
+except testvm.Failure, ex:
+    print >> sys.stderr, "vm-run:", ex
+    sys.exit(1)
