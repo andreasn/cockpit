@@ -83,6 +83,7 @@ try:
 	machine.execute(command="firewall-cmd --add-service=cockpit --permanent")
         machine.execute(command="systemctl enable httpd && systemctl start httpd")
         machine.execute(command="firewall-cmd --permanent --add-service=http")
+        machine.execute(command="systemctl enable docker && systemctl start docker")
         machine.stop()
         sys.exit(0)
 
