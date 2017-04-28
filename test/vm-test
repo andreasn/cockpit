@@ -79,7 +79,10 @@ try:
         machine.upload([ os.path.expanduser("~/.rhel") ], "/root/")
         machine.execute(command="cp /root/.rhel/extras-7.3.4.repo /etc/yum.repos.d/")
         machine.execute(command="yum -y install httpd setroubleshoot-server cockpit cockpit-bridge cockpit-dashboard cockpit-doc cockpit-docker cockpit-machines cockpit-pcp cockpit-storaged cockpit-system cockpit-ws")
+	machine.execute(command="systemctl enable cockpit.socket && systemctl start cockpit.socket")
+	machine.execute(command="firewall-cmd --add-service=cockpit --permanent")
         machine.execute(command="systemctl enable httpd && systemctl start httpd")
+        machine.execute(command="firewall-cmd --permanent --add-service=http")
         machine.stop()
         sys.exit(0)
 
@@ -89,6 +92,7 @@ try:
     # add disks
     machine.add_disk("100M", serial="DISK1")
     machine.add_disk("100M", serial="DISK2")
+    machine.add_disk("200M", serial="WWW")
 
     # add network adapters
     add_iface(machine)
