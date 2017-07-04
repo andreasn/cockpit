@@ -194,8 +194,7 @@ var FileAutoComplete = React.createClass({
     renderError: function(error) {
         return (
             <li className="alert alert-warning">
-                <span className="pficon pficon-warning-triangle-o"></span>
-                <strong>{error}</strong>
+                {error}
             </li>
         );
     },
