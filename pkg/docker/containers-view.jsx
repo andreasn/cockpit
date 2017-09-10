@@ -129,12 +129,38 @@ var ContainerDetails = React.createClass({
     }
 });
 
+var ContainerProblems = React.createClass({
+    onItemClick: function (event) {
+        cockpit.jump(event.currentTarget.dataset.url);
+    },
+
+    render: function () {
+        var problem = this.props.problem;
+
+        var problem_cursors = [];
+        for (var i = 0; i < problem.length; i++) {
+            problem_cursors.push(<a data-url={problem[i][0]} className='list-group-item' onClick={this.onItemClick}>
+            <span className="pficon pficon-error-circle-o fa-lg"></span>
+            {problem[i][1]}
+            <i className="pull-right pficon fa fa-angle-right fa-lg"></i>
+            </a>)
+        }
+
+        return (
+            <div className='list-group'>
+              {problem_cursors}
+            </div>
+        );
+    }
+});
+
 var ContainerList = React.createClass({
     getDefaultProps: function () {
         return {
             client: {},
             onlyShowRunning: true,
-            filterText: ''
+            filterText: '',
+            problems: {}
         };
     },
 
@@ -208,6 +234,7 @@ var ContainerList = React.createClass({
 
         var rows = filtered.map(function (container) {
             var isRunning = !!container.State.Running;
+            var hasProblem = false;
 
             var state;
             if (this.props.client.waiting[container.Id]) {
@@ -219,6 +246,11 @@ var ContainerList = React.createClass({
             var image = container.Image;
             if (container.ImageID && image == container.ImageID)
                 image = docker.truncate_id(image);
+
+            if ( container.Id.slice(0,12) in this.props.problems ) {
+                hasProblem = true;
+                state = <div><span className="pficon pficon-warning-triangle-o"></span>{state}</div>
+            }
 
             var columns = [
                 { name: container.Name.replace(/^\//, ''), header: true },
@@ -260,6 +292,16 @@ var ContainerList = React.createClass({
                     data: { container: container }
                 }
             ];
+
+            if (hasProblem) {
+                tabs.push(
+                    {
+                        name: _("Problems"),
+                        renderer: ContainerProblems,
+                        data: { problem: this.props.problems[container.Id.slice(0,12)] }
+                    }
+                );
+            }
 
             return <Listing.ListingRow key={container.Id}
                                        columns={columns}

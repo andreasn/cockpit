@@ -29,8 +29,24 @@
     var util = require("./util");
     var storage = require("./storage.jsx");
     var view = require("./containers-view.jsx");
+    var journal = require("journal");
 
     require("plot.css");
+
+    var problems_client = cockpit.dbus('org.freedesktop.problems', { superuser: "try" });
+    var service = problems_client.proxy('org.freedesktop.Problems2', '/org/freedesktop/Problems2');
+    var problems = problems_client.proxies('org.freedesktop.Problems2.Entry', '/org/freedesktop/Problems2/Entry');
+
+    var session;
+    problems.wait(function() {
+        service.GetSession().done(function(session_path) {
+            session = problems_client.proxy('org.freedesktop.Problems2.Session', session_path);
+            session.wait(function() {
+                session.Authorize({}); //ignore return code
+            });
+        });
+    });
+
 
     /* OVERVIEW PAGE
      */
@@ -39,12 +55,14 @@
         var headerNode = document.querySelector('#containers .content-filter');
         var containerNode = document.getElementById('containers-containers');
         var imageNode = document.getElementById('containers-images');
+        var displayable_problems = {};
 
         function update_container_list(onlyShowRunning, filterText) {
             React.render(React.createElement(view.ContainerList, {
                 client: client,
                 onlyShowRunning: onlyShowRunning,
-                filterText: filterText
+                filterText: filterText,
+                problems: displayable_problems
             }), containerNode);
         }
 
@@ -62,7 +80,76 @@
             }
         }), headerNode);
 
-        update_container_list(true, '');
+        var find_problems = function () {
+            var r = $.Deferred();
+            problems.wait(function() {
+                try {
+                    service.GetProblems(0, {})
+                        .done(function(problem_paths, options) {
+                            for (var i in problem_paths) {
+                                var p = problems[problem_paths[i]];
+                                find_container_log(p);
+                            }
+                            r.resolve();
+                        });
+                }
+                catch(err) {
+                    r.resolve();
+                }
+            });
+            return r;
+        };
+
+        function find_container_log (p) {
+            if ( problems[p.path].Elements.indexOf('container_id') < 0 ) {
+                return;
+            }
+
+            p.ReadElements(['container_id'], 0x4).done(function(data) {
+                if (data.hasOwnProperty('container_id')){
+                    problem_log(p, data['container_id'].v);
+                }
+            });
+        }
+
+        function problem_log (p, c_id) {
+            var url = null;
+            var message = "";
+            var match = [ ];
+            match.push('SYSLOG_IDENTIFIER=abrt-notification');
+            match.push('PROBLEM_DIR=' + p.ID);
+            journal.journalctl(match, { follow: false, reverse: true, all: true} ).
+                stream(function(entries) {
+                    // Only first entry is enough, since others are only previous occurrences
+                    url = cockpit.location.encode(entries[0]['__CURSOR']);
+                    url = "/system/logs#" + url;
+                    if (entries[0]['PROBLEM_REASON'])
+                        message = entries[0]['PROBLEM_REASON'];
+                    else
+                        message = entries[0]['MESSAGE'];
+
+                    if ( c_id in displayable_problems )
+                        displayable_problems[c_id].push([url, message]);
+                    else
+                        displayable_problems[c_id] = [[url, message]];
+                }).
+                fail(function (error) {
+                    window.alert(error);
+                });
+        }
+
+        find_problems().done(function() {
+            update_container_list(true, '');
+        });
+
+        $(service).on("Crash", function(event, problem_path, uid) {
+            var entry = problems_client.proxy('org.freedesktop.Problems2.Entry', problem_path);
+            entry.wait(function() {
+                find_container_log(entry);
+                window.location.reload(); //TODO not ideal
+            });
+        });
+
         update_image_list('');
 
         var cpu_series;
