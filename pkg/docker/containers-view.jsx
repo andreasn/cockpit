@@ -140,14 +140,14 @@ var ContainerProblems = React.createClass({
         var problem_cursors = [];
         for (var i = 0; i < problem.length; i++) {
             problem_cursors.push(<a data-url={problem[i][0]} className='list-group-item' onClick={this.onItemClick}>
-            <span className="pficon pficon-error-circle-o fa-lg"></span>
+            <span className="pficon pficon-warning-triangle-o fa-lg"></span>
             {problem[i][1]}
             <i className="pull-right pficon fa fa-angle-right fa-lg"></i>
             </a>)
         }
 
         return (
-            <div className='list-group'>
+            <div className='list-group' className='dialog-list-ct'>
               {problem_cursors}
             </div>
         );
