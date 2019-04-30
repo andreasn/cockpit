@@ -298,7 +298,7 @@ const Body = ({ body, fields, values, errors, onChange }) => {
         else if (index === undefined) // top-level
             return <form className="ct-form-layout">{ rows }</form>;
         else // nested
-            return <div key={index} role="group">{ rows }</div>;
+            return <div key={index} className="ct-form-layout">{ rows }</div>;
     }
 
     return (
