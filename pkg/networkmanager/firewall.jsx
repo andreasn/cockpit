@@ -864,7 +864,7 @@ export class Firewall extends React.Component {
                         <span className="btn-group">{addZoneAction}</span>
                     </h1>
                 </div>
-                <div id="zones-listing">
+                <div id="zones-listing" className="container-fluid">
                     { enabled && <>
                         {
                             zones.map(z => <ZoneSection key={z.id}

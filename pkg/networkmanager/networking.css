@@ -268,13 +268,9 @@ h1 .onoff-ct {
     }
 }
 
-#zones-listing {
-    margin: 2rem 3rem;
-}
-
 #firewall-heading {
     background: #FFFFFF;
-    padding: 10px;
+    padding: 1rem 3rem;
 }
 
 #firewall-heading > h1 {
@@ -288,6 +284,7 @@ h1 .onoff-ct {
 
 #firewall-heading .btn-group {
     display: inline-flex;
+    align-items: center;
 }
 
 .zone-section {
