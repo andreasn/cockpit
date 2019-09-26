@@ -196,6 +196,7 @@ function getServices() {
                 .then(services => {
                     const promises = [];
                     for (const s of services) {
+                        if (s === undefined) continue;
                         firewall.enabledServices.add(s.id);
                         if (s.includes.length)
                             promises.push(fetchServiceInfos(s.includes));
@@ -363,8 +364,8 @@ firewall.addService = (zone, service) => {
  *
  * Returns a promise that resolves when all services are added.
  */
-firewall.addServices = (zones, services) =>
-    Promise.all(zones.map(z => services.map(s => firewall.addService(z, s))));
+firewall.addServices = (zone, services) =>
+    Promise.all(services.map(s => firewall.addService(zone, s)));
 
 firewall.removeServiceFromZones = (zones, service) =>
     Promise.all(zones.map(z => firewall.removeService(z, service)));

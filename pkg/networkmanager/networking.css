@@ -268,21 +268,47 @@ h1 .onoff-ct {
     }
 }
 
-#zones-listing,
-#services-listing {
-    margin: 2rem 0;
+#zones-listing {
+    margin: 2rem 3rem;
 }
 
-#services-listing .listing-ct-body h5 {
-    margin: 1.5rem 0 1rem;
+#firewall-heading {
+    background: #FFFFFF;
+    padding: 10px;
 }
 
-#services-listing .listing-ct-body ul {
-    padding-left: 1rem;
+#firewall-heading > h1 {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+}
+#firewall-heading > h1 > span:first-child {
+    display: flex;
 }
 
-#services-listing .listing-ct-body li + li {
-    margin-top: 1rem;
+#firewall-heading .btn-group {
+    display: inline-flex;
+}
+
+.zone-section {
+    background: #FFFFFF;
+    border-top: 1px solid #d2d2d2;
+    border-left: 1px solid #d2d2d2;
+    border-right: 1px solid #d2d2d2;
+    margin: 0 0 2rem 0;
+}
+
+.zone-section > h4:first-child {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #d2d2d2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.zone-section > h4:first-child > span > span {
+    font-size: 75%;
 }
 
 #add-zone-dialog .add-zone-zones legend {
