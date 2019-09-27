@@ -159,7 +159,7 @@ function ZoneSection(props) {
                 { props.zone.interfaces.length > 0 && <span>&nbsp;&nbsp;&nbsp;<strong>{_("Interfaces")}</strong> {props.zone.interfaces.join(", ")}</span> }
                 { props.zone.source.length > 0 && <span>&nbsp;&nbsp;&nbsp;<strong>{_("Addresses")}</strong> 111.111.111.111/24{props.zone.source.join(", ")}</span> }
             </span>
-            <span className="btn-group">{deleteButton}&nbsp;{addServiceAction}</span>
+            <span className="zone-actions">{deleteButton}&nbsp;{addServiceAction}</span>
         </h4>
         {props.zone.services.length > 0 &&
         <Listing columnTitles={[_("Service"), _("TCP"), _("UDP"), ""]}
