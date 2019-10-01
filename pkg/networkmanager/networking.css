@@ -1,3 +1,7 @@
+body {
+    background: var(--pf-global--BackgroundColor--light-300);
+}
+
 .ipv4-address {
   display: inline;
 }
@@ -268,9 +272,14 @@ h1 .onoff-ct {
     }
 }
 
-#firewall-heading {
+#firewall-heading,
+#networking-graphs {
     background: #FFFFFF;
     padding: 1rem 3rem;
+}
+
+#networking-graphs .row {
+    margin: 0;
 }
 
 #firewall-heading > h1 {
