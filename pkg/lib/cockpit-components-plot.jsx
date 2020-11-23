@@ -1,34 +1,35 @@
-import 'jquery';
+/*
+ * This file is part of Cockpit.
+ *
+ * Copyright (C) 2020 Red Hat, Inc.
+ *
+ * Cockpit is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * Cockpit is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import '@patternfly/patternfly/patternfly-charts.css';
-import '../lib/patternfly/patternfly-cockpit.scss';
-import './plot-pf4.css';
+import cockpit from "cockpit";
+import moment from "moment";
 
 import React, { useState, useRef } from 'react';
-import ReactDOM from "react-dom";
+import { useEvent } from "hooks.js";
 
 import {
     Button,
     Dropdown,
     DropdownToggle,
     DropdownItem,
-    DropdownSeparator,
-    Page,
-    Card,
-    CardBody,
-    Split,
-    SplitItem,
-    Grid,
-    GridItem
+    DropdownSeparator
 } from '@patternfly/react-core';
-
-import * as plot from "plot.js";
-import { useObject, useEvent } from "hooks.js";
-
-import cockpit from "cockpit";
-import moment from "moment";
-
-import "../lib/patternfly/patternfly-4-overrides.scss";
 
 const _ = cockpit.gettext;
 
@@ -134,8 +135,8 @@ function time_ticks(data) {
     };
 }
 
-function value_ticks(data) {
-    let max = 4 * 1024;
+function value_ticks(data, config) {
+    let max = 4 * config.base_unit;
     const last_plot = data[data.length - 1].data;
     for (let i = 0; i < last_plot.length; i++) {
         const s = last_plot[i][1] || last_plot[i][2];
@@ -145,8 +146,8 @@ function value_ticks(data) {
 
     // Pick a unit
     let unit = 1;
-    while (max > unit * 1024)
-        unit *= 1024;
+    while (max > unit * config.base_unit)
+        unit *= config.base_unit;
 
     // Find the highest power of 10 that is below max.  If we use that
     // as the distance between ticks, we get at most 10 ticks.
@@ -163,132 +164,17 @@ function value_ticks(data) {
     for (let t = 0; t <= max; t += size)
         ticks.push(t);
 
-    const unit_str = cockpit.format_bytes_per_sec(unit, 1024, true)[1];
+    const unit_str = config.formatter(unit, config.base_unit, true)[1];
 
     return {
         ticks: ticks,
-        formatter: (val) => cockpit.format_bytes_per_sec(val, unit_str, true)[0],
+        formatter: (val) => config.formatter(val, unit_str, true)[0],
         unit: unit_str,
         max: max
     };
 }
 
-class ZoomState {
-    constructor(plots) {
-        cockpit.event_target(this);
-        this.x_range = 5 * 60;
-        this.x_stop = undefined;
-        this.history = [];
-        this.plots = plots;
-
-        this.enable_zoom = false;
-
-        this.enable_zoom_in = false;
-        this.enable_zoom_out = true;
-        this.enable_scroll_left = true;
-        this.enable_scroll_right = false;
-
-        this._update = () => {
-            const enable = !!this.plots.find(p => p.archives);
-            if (enable != this.enable_zoom) {
-                this.enable_zoom = enable;
-                this.dispatchEvent("changed");
-            }
-        };
-
-        this.plots.forEach(p => p.addEventListener("changed", this._update));
-    }
-
-    destroy() {
-        this.plots.forEach(p => p.removeEventListener("changed", this._update));
-    }
-
-    reset() {
-        const plot_min_x_range = 5 * 60;
-
-        if (this.x_range < plot_min_x_range) {
-            this.x_stop += (plot_min_x_range - this.x_range) / 2;
-            this.x_range = plot_min_x_range;
-        }
-        if (this.x_stop >= (new Date()).getTime() / 1000 - 10)
-            this.x_stop = undefined;
-
-        this.plots.forEach(p => {
-            p.stop_walking();
-            p.reset(this.x_range, this.x_stop);
-            p.refresh();
-            if (this.x_stop === undefined)
-                p.start_walking();
-        });
-
-        this.enable_zoom_in = (this.x_range > plot_min_x_range);
-        this.enable_scroll_right = (this.x_stop !== undefined);
-
-        this.dispatchEvent("changed");
-    }
-
-    set_range(x_range) {
-        this.history = [];
-        this.x_range = x_range;
-        this.reset();
-    }
-
-    zoom_in(x_range, x_stop) {
-        this.history.push(this.x_range);
-        this.x_range = x_range;
-        this.x_stop = x_stop;
-        this.reset();
-    }
-
-    zoom_out() {
-        const plot_zoom_steps = [
-            5 * 60,
-            60 * 60,
-            6 * 60 * 60,
-            24 * 60 * 60,
-            7 * 24 * 60 * 60,
-            30 * 24 * 60 * 60,
-            365 * 24 * 60 * 60
-        ];
-
-        var r = this.history.pop();
-        if (r === undefined) {
-            var i;
-            for (i = 0; i < plot_zoom_steps.length - 1; i++) {
-                if (plot_zoom_steps[i] > this.x_range)
-                    break;
-            }
-            r = plot_zoom_steps[i];
-        }
-        if (this.x_stop !== undefined)
-            this.x_stop += (r - this.x_range) / 2;
-        this.x_range = r;
-        this.reset();
-    }
-
-    goto_now() {
-        this.x_stop = undefined;
-        this.reset();
-    }
-
-    scroll_left() {
-        var step = this.x_range / 10;
-        if (this.x_stop === undefined)
-            this.x_stop = (new Date()).getTime() / 1000;
-        this.x_stop -= step;
-        this.reset();
-    }
-
-    scroll_right() {
-        var step = this.x_range / 10;
-        if (this.x_stop !== undefined) {
-            this.x_stop += step;
-            this.reset();
-        }
-    }
-}
-
-const ZoomControls = ({ zoom_state }) => {
+export const ZoomControls = ({ plot_state }) => {
     function format_range(seconds) {
         var n;
         if (seconds >= 365 * 24 * 60 * 60) {
@@ -312,7 +198,10 @@ const ZoomControls = ({ zoom_state }) => {
         }
     }
 
+    const zoom_state = plot_state.zoom_state;
+
     const [isOpen, setIsOpen] = useState(false);
+    useEvent(plot_state, "changed");
     useEvent(zoom_state, "changed");
 
     function range_item(seconds, title) {
@@ -326,7 +215,7 @@ const ZoomControls = ({ zoom_state }) => {
             </DropdownItem>);
     }
 
-    if (!zoom_state.enable_zoom)
+    if (!zoom_state)
         return null;
 
     return (
@@ -363,19 +252,22 @@ const ZoomControls = ({ zoom_state }) => {
     );
 };
 
-const StorageSvgPlot = ({ title, plot, zoom_state, onHover }) => {
+export const SvgPlot = ({ title, config, plot_state, plot_id, onHover, className }) => {
     const container_ref = useRef(null);
     const measure_ref = useRef(null);
 
-    useEvent(plot, "plot");
-    useEvent(zoom_state, "changed");
+    useEvent(plot_state, "plot:" + plot_id);
+    useEvent(plot_state, "changed");
     useEvent(window, "resize");
 
     const [selection, setSelection] = useState(null);
 
-    const chart_data = plot.flot_data;
+    const chart_data = plot_state.data(plot_id);
+    if (!chart_data)
+        return null;
+
     const t_ticks = time_ticks(chart_data);
-    const y_ticks = value_ticks(chart_data);
+    const y_ticks = value_ticks(chart_data, config);
 
     function make_chart() {
         if (!container_ref.current)
@@ -442,7 +334,7 @@ const StorageSvgPlot = ({ title, plot, zoom_state, onHover }) => {
 
         const paths = [];
         for (let i = chart_data.length - 1; i >= 0; i--)
-            paths.push(path(chart_data[i].data, colors[i], i));
+            paths.push(path(chart_data[i].data, colors[i % colors.length], i));
 
         function start_dragging(event) {
             if (event.button !== 0)
@@ -468,7 +360,7 @@ const StorageSvgPlot = ({ title, plot, zoom_state, onHover }) => {
         function stop_dragging() {
             const left = x_value(selection.left) / 1000;
             const right = x_value(selection.right) / 1000;
-            zoom_state.zoom_in(right - left, right);
+            plot_state.zoom_state.zoom_in(right - left, right);
             setSelection(null);
         }
 
@@ -478,11 +370,11 @@ const StorageSvgPlot = ({ title, plot, zoom_state, onHover }) => {
 
         return (
             <svg width={w} height={h}
-                 onMouseDown={zoom_state.enable_zoom_in ? start_dragging : null}
+                 onMouseDown={plot_state.zoom_state && plot_state.zoom_state.enable_zoom_in ? start_dragging : null}
                  onMouseUp={selection ? stop_dragging : null}
                  onMouseMove={selection ? drag : null}
                  onMouseLeave={cancel_dragging}>
-                <text x={0} y={-20} style={{ fontSize: "small" }} ref={measure_ref}>MiB/s</text>
+                <text x={0} y={-20} style={{ fontSize: "small" }} ref={measure_ref}>{config.widest_unit_string}</text>
                 <rect x={m_left} y={m_top} width={w - m_left - m_right} height={h - m_top - m_bottom}
                       stroke="black" fill="transparent" shapeRendering="crispEdges" />
                 <text x={m_left - tick_length - tick_gap} y={0.5 * m_top}
@@ -521,131 +413,13 @@ const StorageSvgPlot = ({ title, plot, zoom_state, onHover }) => {
     }
 
     return (
-        <div className="storage-graph" ref={container_ref}>
+        <div className={className} ref={container_ref}>
             {make_chart()}
         </div>);
 };
 
-class PlotState {
-    constructor() {
-        this.plot = new plot.Plot(null, 300);
-        this.plot.start_walking();
-    }
-
-    plot_single(metric) {
-        if (this.stacked_instances_series) {
-            this.stacked_instances_series.clear_instances();
-            this.stacked_instances_series.remove();
-            this.stacked_instances_series = null;
-        }
-        if (!this.sum_series) {
-            this.sum_series = this.plot.add_metrics_sum_series(metric, { });
-        }
-    }
-
-    plot_instances(metric, insts) {
-        if (this.sum_series) {
-            this.sum_series.remove();
-            this.sum_series = null;
-        }
-        if (!this.stacked_instances_series) {
-            this.stacked_instances_series = this.plot.add_metrics_stacked_instances_series(metric, { });
-        }
-        // XXX - Add all instances, but don't remove anything.
-        //
-        // This doesn't remove old instances, but that is mostly
-        // harmless since if the block device doesn't exist anymore, we
-        // don't get samples for it.  But it would be better to be precise here.
-        for (var i = 0; i < insts.length; i++) {
-            this.stacked_instances_series.add_instance(insts[i]);
-        }
-    }
-
-    destroy() {
-        this.plot.destroy();
-    }
-}
-
-const instances_read_metric = {
-    direct: "disk.dev.read_bytes",
-    internal: "block.device.read",
-    units: "bytes",
-    derive: "rate",
-    threshold: 1000
+export const bytes_per_sec_config = {
+    base_unit: 1024,
+    widest_unit_string: "MiB/s",
+    formatter: cockpit.format_bytes_per_sec
 };
-
-const instances_write_metric = {
-    direct: "disk.dev.write_bytes",
-    internal: "block.device.written",
-    units: "bytes",
-    derive: "rate",
-    threshold: 1000
-};
-
-const single_read_metric = {
-    direct: ["disk.all.read_bytes"],
-    internal: ["disk.all.read"],
-    units: "bytes",
-    derive: "rate",
-    threshold: 1000
-};
-
-const single_write_metric = {
-    direct: ["disk.all.write_bytes"],
-    internal: ["disk.all.written"],
-    units: "bytes",
-    derive: "rate",
-    threshold: 1000
-};
-
-const StoragePlots = () => {
-    const devs = ["vda", "sda", "sdb"];
-
-    const ps1 = useObject(() => new PlotState(), ps => ps.destroy(), []);
-    const ps2 = useObject(() => new PlotState(), ps => ps.destroy(), []);
-    const zs = useObject(() => new ZoomState([ps1.plot, ps2.plot]), zs => zs.destroy(), [ps1.plot, ps2.plot]);
-
-    if (devs.length > 8) {
-        ps1.plot_single(single_read_metric);
-        ps2.plot_single(single_write_metric);
-    } else {
-        ps1.plot_instances(instances_read_metric, devs);
-        ps2.plot_instances(instances_write_metric, devs);
-    }
-
-    const [hovered, setHovered] = useState(null);
-
-    return (
-        <>
-            <Split>
-                <SplitItem isFilled />
-                <SplitItem><ZoomControls zoom_state={zs} /></SplitItem>
-            </Split>
-            <Grid sm={12} md={6} lg={6} hasGutter>
-                <GridItem>
-                    <StorageSvgPlot title="Reading" plot={ps1.plot} zoom_state={zs}
-                                    onHover={idx => setHovered(devs[idx])} />
-                </GridItem>
-                <GridItem>
-                    <StorageSvgPlot title="Writing" plot={ps2.plot} zoom_state={zs}
-                                    onHover={idx => setHovered(devs[idx])} />
-                </GridItem>
-            </Grid>
-            <div>{(hovered && devs.length <= 8) ? hovered : "--"}</div>
-        </>);
-};
-
-const MyPage = () => {
-    return (
-        <Page>
-            <Card>
-                <CardBody>
-                    <StoragePlots />
-                </CardBody>
-            </Card>
-        </Page>);
-};
-
-document.addEventListener("DOMContentLoaded", function() {
-    ReactDOM.render(<MyPage />, document.getElementById('plots'));
-});
