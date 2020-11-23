@@ -316,7 +316,7 @@ export const SvgPlot = ({ title, config, plot_state, plot_id, onHover, className
             d += cmd("L", w - m_right, h - m_bottom);
             d += "z";
 
-            return <path key={index} d={d} stroke="black" fill={color}
+            return <path key={index} d={d} stroke="#005dc9" fill={color}
                          onMouseEnter={() => {
                              const instances = plot_state.instances(plot_id);
                              if (instances)
@@ -382,7 +382,7 @@ export const SvgPlot = ({ title, config, plot_state, plot_id, onHover, className
                  onMouseLeave={cancel_dragging}>
                 <text x={0} y={-20} style={{ fontSize: "small" }} ref={measure_ref}>{config.widest_unit_string}</text>
                 <rect x={m_left} y={m_top} width={w - m_left - m_right} height={h - m_top - m_bottom}
-                      stroke="black" fill="transparent" shapeRendering="crispEdges" />
+                      stroke="#d4d4d4" fill="transparent" shapeRendering="crispEdges" />
                 <text x={m_left - tick_length - tick_gap} y={0.5 * m_top}
                       style={{ fontSize: "small" }}
                       textAnchor="end">
@@ -394,11 +394,11 @@ export const SvgPlot = ({ title, config, plot_state, plot_id, onHover, className
                 { y_ticks.ticks.map((t, i) => <line key={i}
                                                     x1={m_left - tick_length} x2={w - m_right}
                                                     y1={y_coord(t)} y2={y_coord(t)}
-                                                    stroke="black" shapeRendering="crispEdges" />) }
+                                                    stroke="#d4d4d4" shapeRendering="crispEdges" />) }
                 { t_ticks.ticks.map((t, i) => <line key={i}
                                                     x1={x_coord(t)} x2={x_coord(t)}
                                                     y1={h - m_bottom} y2={h - m_bottom + tick_length}
-                                                    stroke="black" shapeRendering="crispEdges" />) }
+                                                    stroke="#d4d4d4" shapeRendering="crispEdges" />) }
                 { paths }
                 { y_ticks.ticks.map((t, i) => <text key={i} x={m_left - tick_length - tick_gap} y={y_coord(t) + 5}
                                                     textAnchor="end"
