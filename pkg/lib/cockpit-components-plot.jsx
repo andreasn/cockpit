@@ -161,7 +161,7 @@ function value_ticks(data, config) {
         size /= 2;
 
     var ticks = [];
-    for (let t = 0; t <= max; t += size)
+    for (let t = 0; t <= max + size; t += size)
         ticks.push(t);
 
     const unit_str = config.formatter(unit, config.base_unit, true)[1];
@@ -170,7 +170,7 @@ function value_ticks(data, config) {
         ticks: ticks,
         formatter: (val) => config.formatter(val, unit_str, true)[0],
         unit: unit_str,
-        max: max
+        max: ticks[ticks.length - 1]
     };
 }
 
@@ -263,7 +263,7 @@ export const SvgPlot = ({ title, config, plot_state, plot_id, onHover, className
     const [selection, setSelection] = useState(null);
 
     const chart_data = plot_state.data(plot_id);
-    if (!chart_data)
+    if (!chart_data || chart_data.length == 0)
         return null;
 
     const t_ticks = time_ticks(chart_data);
@@ -317,8 +317,14 @@ export const SvgPlot = ({ title, config, plot_state, plot_id, onHover, className
             d += "z";
 
             return <path key={index} d={d} stroke="black" fill={color}
-                         onMouseEnter={() => onHover(index)}
-                         onMouseLeave={() => onHover(-1)} />;
+                         onMouseEnter={() => {
+                             const instances = plot_state.instances(plot_id);
+                             if (instances)
+                                 onHover(instances[index]);
+                             else
+                                 onHover(true);
+                         }}
+                         onMouseLeave={() => onHover(null)} />;
         }
 
         const colors = [
@@ -422,4 +428,10 @@ export const bytes_per_sec_config = {
     base_unit: 1024,
     widest_unit_string: "MiB/s",
     formatter: cockpit.format_bytes_per_sec
+};
+
+export const bits_per_sec_config = {
+    base_unit: 1000,
+    widest_unit_string: "Mbps",
+    formatter: cockpit.format_bits_per_sec
 };

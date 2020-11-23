@@ -60,15 +60,12 @@ const StoragePlots = () => {
     const ps = useObject(() => new PlotState(), ps => null, []);
     const [hovered, setHovered] = useState(null);
 
-    let onHover;
     if (devs.length > 8) {
         ps.plot_single('read', single_read_metric);
         ps.plot_single('write', single_write_metric);
-        onHover = idx => null;
     } else {
         ps.plot_instances('read', instances_read_metric, devs);
         ps.plot_instances('write', instances_write_metric, devs);
-        onHover = idx => { onHover = setHovered(devs[idx]) };
     }
 
     return (
@@ -81,12 +78,12 @@ const StoragePlots = () => {
                 <GridItem>
                     <SvgPlot className="storage-graph"
                              title="Reading" config={bytes_per_sec_config}
-                             plot_state={ps} plot_id='read' onHover={onHover} />
+                             plot_state={ps} plot_id='read' onHover={setHovered} />
                 </GridItem>
                 <GridItem>
                     <SvgPlot className="storage-graph"
                              title="Writing" config={bytes_per_sec_config}
-                             plot_state={ps} plot_id='write' onHover={onHover} />
+                             plot_state={ps} plot_id='write' onHover={setHovered} />
                 </GridItem>
             </Grid>
             <div>{hovered || "--"}</div>
