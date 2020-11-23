@@ -290,7 +290,7 @@ export function useEvent(obj, event) {
             setToggler(toggle => !toggle);
         }
 
-        obj.addEventListener(event, update);
-        return () => obj.removeEventListener(event, update);
+        obj && obj.addEventListener(event, update);
+        return () => obj && obj.removeEventListener(event, update);
     }, [obj, event]);
 }
