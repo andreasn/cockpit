@@ -119,6 +119,10 @@
     height: 120px;
 }
 
+.network-graph {
+    height: 180px;
+}
+
 th.networking-speed {
     width: 20%;
 }
